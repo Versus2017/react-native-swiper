@@ -99,6 +99,10 @@ declare module 'react-native-swiper' {
         automaticallyAdjustContentInsets?: boolean
         // Enables/Disables swiping
         scrollEnabled?: boolean
+
+        // if item is smaller than container and items scroll to the last,
+        // we need use more items to full of the container when in loop.
+        preloadCount?: number
     }
 
     export default class Swiper extends Component<SwiperProps, any> {

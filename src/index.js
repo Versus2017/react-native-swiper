@@ -13,8 +13,10 @@ import {
   TouchableOpacity,
   ViewPagerAndroid,
   Platform,
-  ActivityIndicator
+  ActivityIndicator,
+  StyleSheet,
 } from 'react-native'
+import VertViewPager from 'react-native-vertical-view-pager'
 
 /**
  * Default styles
@@ -141,6 +143,7 @@ export default class extends Component {
     activeDotStyle: PropTypes.oneOfType([PropTypes.object, PropTypes.number]),
     dotColor: PropTypes.string,
     activeDotColor: PropTypes.string,
+    preloadCount: PropTypes.number,
     /**
      * Called when the index has changed because the user swiped.
      */
@@ -170,6 +173,7 @@ export default class extends Component {
     autoplay: false,
     autoplayTimeout: 2.5,
     autoplayDirection: true,
+    preloadCount: 1,
     index: 0,
     onIndexChanged: () => null
   }
@@ -462,7 +466,7 @@ export default class extends Component {
     if (state.dir === 'x') x = diff * state.width
     if (state.dir === 'y') y = diff * state.height
 
-    if (Platform.OS !== 'ios') {
+    if (Platform.OS !== 'ios' && this.props.horizontal === true) {
       this.scrollView && this.scrollView[animated ? 'setPage' : 'setPageWithoutAnimation'](diff)
     } else {
       this.scrollView && this.scrollView.scrollTo({ x, y, animated })
@@ -636,16 +640,30 @@ export default class extends Component {
         </ScrollView>
        )
     }
-    return (
-      <ViewPagerAndroid ref={this.refScrollView}
-        {...this.props}
-        initialPage={this.props.loop ? this.state.index + 1 : this.state.index}
-        onPageSelected={this.onScrollEnd}
-        key={pages.length}
-        style={[styles.wrapperAndroid, this.props.style]}>
-        {pages}
-      </ViewPagerAndroid>
-    )
+    if (this.props.horizontal === false) {
+      return (
+        <VertViewPager ref={this.refScrollView}
+                       {...this.props}
+                       initialPage={this.props.loop ? this.state.index + 1 : this.state.index}
+                       onPageSelected={this.onScrollEnd}
+                       key={pages.length}
+                       style={StyleSheet.flatten([styles.wrapperAndroid, this.props.style])}>
+          {pages}
+        </VertViewPager>
+      )
+    } else {
+      return (
+        <ViewPagerAndroid ref={this.refScrollView}
+                          {...this.props}
+                          initialPage={this.props.loop ? this.state.index + 1 : this.state.index}
+                          onPageSelected={this.onScrollEnd}
+                          key={pages.length}
+                          style={[styles.wrapperAndroid, this.props.style]}>
+          {pages}
+        </ViewPagerAndroid>
+      )
+
+    }
   }
 
   /**
@@ -665,6 +683,7 @@ export default class extends Component {
       children,
       containerStyle,
       loop,
+      preloadCount,
       loadMinimal,
       loadMinimalSize,
       loadMinimalLoader,
@@ -691,7 +710,11 @@ export default class extends Component {
       // Re-design a loop model for avoid img flickering
       pages = Object.keys(children)
       if (loop) {
-        pages.unshift(total - 1 + '')
+        if (preloadCount > 1 && total > 4) {
+          pages.unshift(total - 1 + '', total - 2 + '', total - 3 + '')
+        } else {
+          pages.unshift(total - 1 + '')
+        }
         pages.push('0')
       }
 
