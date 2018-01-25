@@ -696,7 +696,7 @@ export default class extends Component {
     const loopVal = loop ? 1 : 0
     let pages = []
 
-    const pageStyle = [{width: width, height: height}, styles.slide]
+    let pageStyle = [{width: width, height: height}, styles.slide]
     const pageStyleLoading = {
       width,
       height,
@@ -711,6 +711,7 @@ export default class extends Component {
       pages = Object.keys(children)
       if (loop) {
         if (preloadCount > 1 && total > 4) {
+          pageStyle = [{width: props.width, height: props.height}, styles.slide]
           pages.unshift(total - 1 + '', total - 2 + '', total - 3 + '')
         } else {
           pages.unshift(total - 1 + '')
